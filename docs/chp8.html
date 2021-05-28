@@ -218,13 +218,12 @@
 <p>This code studies the numerical properties of a simple business-cycle matching model.
 The model only features self-employed workers who sell their services on a goods market.
 It would be possible to have firms and separate labor and goods markets using the model in <a class="reference external" href="https://doi.org/10.1093/qje/qjv006">Michaillat &amp; Saez (QJE, 2015)</a>.</p>
-<p>The code calibrates the model to US data and simulates the model in response to aggregate demand shocks and to government spending shocks</p>
-<p>Note that the simulations do not describe the response of the model to stochastic shocks (as in state-of-the-art macro). Rather the simulations are “quantitative comparative statics”: they show the responses to “MIT shocks.”</p>
-<p>For all derivations:  see section 2.2, section 2.4, section 5, and online appendix A of <a class="reference external" href="https://doi.org/10.1093/restud/rdy030">Michaillat &amp; Saez (Review of Economic Studies, 2019)</a></p>
+<p>The code calibrates the model to US data and simulates the model in response to aggregate demand shocks and government spending shocks</p>
+<p>Note that the simulations do not describe the response of the model to stochastic shocks (as in state-of-the-art macro). Rather, the simulations are “quantitative comparative statics”: they show responses to “MIT shocks.”</p>
+<p>For all derivations, see section 2.2, section 2.4, section 5, and online appendix A in <a class="reference external" href="https://doi.org/10.1093/restud/rdy030">Michaillat &amp; Saez (Review of Economic Studies, 2019)</a></p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
-
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 </pre></div>
@@ -233,7 +232,7 @@ It would be possible to have firms and separate labor and goods markets using th
 </div>
 <div class="section" id="parameter-values">
 <h2>Parameter Values<a class="headerlink" href="#parameter-values" title="Permalink to this headline">¶</a></h2>
-<p>We use the following calibration for the following parameters, which is based on US data:</p>
+<p>We first calibrate the following parameters that will be used in the model:</p>
 <ul class="simple">
 <li><p><span class="math notranslate nohighlight">\(k\)</span> : productive capacity, which can also be endogenized by adding a labor market where firms hire workers</p></li>
 <li><p><span class="math notranslate nohighlight">\(\epsilon\)</span> : elasticity of substitution between public and private consumption</p></li>
@@ -247,6 +246,7 @@ It would be possible to have firms and separate labor and goods markets using th
 <li><p><span class="math notranslate nohighlight">\(\bar{G/C}\)</span> : target for average G/C</p></li>
 <li><p><span class="math notranslate nohighlight">\(\gamma\)</span> : preference parameter</p></li>
 </ul>
+<p>The calibration values below are based on US data.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">k</span> <span class="o">=</span> <span class="mi">1</span>
@@ -288,14 +288,36 @@ It would be possible to have firms and separate labor and goods markets using th
 </div>
 </div>
 </div>
-<p>We also compute the following matching parameters. The formula for elasticity of output to tightness is given by</p>
+<p>We also compute the following matching parameters.</p>
+<p>The buying rate <span class="math notranslate nohighlight">\(q\)</span>, as a function of labor market tightness <span class="math notranslate nohighlight">\(x\)</span>, is:</p>
 <div class="math notranslate nohighlight">
-\[\frac{d\ln{y}}{d\ln{x}} = (1-\eta) * u(x) - \eta * \tau(x)\]</div>
+\[q(x) = \omega x^{\eta}.\]</div>
+<p>The selling rate <span class="math notranslate nohighlight">\(f\)</span>, as a function of labor market tightness <span class="math notranslate nohighlight">\(x\)</span>, is:</p>
+<div class="math notranslate nohighlight">
+\[f(x) = \omega x^{1-\eta}.\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="p">(</span><span class="o">-</span><span class="n">eta</span><span class="p">)</span> <span class="c1">#buying rate</span>
 <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">omega</span><span class="o">*</span><span class="n">x</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eta</span><span class="p">)</span> <span class="c1">#selling rate</span>
-<span class="n">taubar</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">eta</span><span class="p">)</span><span class="o">*</span><span class="n">ubar</span><span class="o">/</span><span class="n">eta</span> <span class="c1">#average matching wedge</span>
+</pre></div>
+</div>
+</div>
+</div>
+<p>The average matching wedge <span class="math notranslate nohighlight">\(\bar{\tau}\)</span> is:</p>
+<div class="math notranslate nohighlight">
+\[\bar{\tau} = (1-\eta)\frac{\bar{u}}{\eta}.\]</div>
+<p>The matching cost <span class="math notranslate nohighlight">\(\rho\)</span> is given by:</p>
+<div class="math notranslate nohighlight">
+\[\rho = q(\bar{x})\frac{\bar{\tau}}{1+\bar{\tau}}.\]</div>
+<p>The matching wedge <span class="math notranslate nohighlight">\(\tau\)</span> is:</p>
+<div class="math notranslate nohighlight">
+\[\tau(x) = s\frac{\rho}{q(x) - s\rho}.\]</div>
+<p>The formula for elasticity of output to tightness is given by</p>
+<div class="math notranslate nohighlight">
+\[\frac{d\ln{y}}{d\ln{x}} = (1-\eta) * u(x) - \eta * \tau(x).\]</div>
+<div class="cell docutils container">
+<div class="cell_input docutils container">
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">taubar</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">eta</span><span class="p">)</span><span class="o">*</span><span class="n">ubar</span><span class="o">/</span><span class="n">eta</span> <span class="c1">#average matching wedge</span>
 <span class="n">rho</span> <span class="o">=</span> <span class="n">q</span><span class="p">(</span><span class="n">xbar</span><span class="p">)</span><span class="o">/</span><span class="n">s</span><span class="o">*</span><span class="n">taubar</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">taubar</span><span class="p">)</span> <span class="c1">#matching cost</span>
 <span class="n">tau</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span><span class="n">s</span><span class="o">*</span><span class="n">rho</span><span class="o">/</span><span class="p">(</span><span class="n">q</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">s</span><span class="o">*</span><span class="n">rho</span><span class="p">)</span> <span class="c1">#matching wedge</span>
 <span class="n">dlnydlnx</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:(</span><span class="mi">1</span><span class="o">-</span><span class="n">eta</span><span class="p">)</span><span class="o">*</span><span class="n">u</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="n">eta</span><span class="o">*</span><span class="n">tau</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="c1">#elasticity of output to tightness</span>
@@ -330,8 +352,9 @@ It would be possible to have firms and separate labor and goods markets using th
 \[\frac{\delta \ln{\mathcal{U}}}{\delta \ln{c}} = (1-\gamma)^{{1/\epsilon}} \left(\frac{c}{\mathcal{U}}\right)^{\frac{\epsilon-1}{\epsilon}},\quad \mathcal{U}_c \equiv \frac{\delta \mathcal{U}}{\delta c} = \left((1-\gamma) \frac{\mathcal{U}}{c}\right)^{1/\epsilon}\]</div>
 <div class="math notranslate nohighlight">
 \[\frac{\delta \ln{\mathcal{U}}}{\delta \ln{g}} = \gamma^{{1/\epsilon}} \left(\frac{g}{\mathcal{U}}\right)^{\frac{\epsilon-1}{\epsilon}},\quad \mathcal{U}_g \equiv \frac{\delta \mathcal{U}}{\delta g} = \left(\gamma \frac{\mathcal{U}}{g}\right)^{1/\epsilon}\]</div>
-<p>which gives the marginal rate of substitution:
-$<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\mathcal{U}_c}  = \frac{\gamma^{1/\epsilon}}{(1-\gamma)^{1/\epsilon}}*(gc)^{1/\epsilon}.\)</span>$</p>
+<p>which gives the marginal rate of substitution:</p>
+<div class="math notranslate nohighlight">
+\[MRS_{gc} = \frac{\mathcal{U}_g}{\mathcal{U}_c}  = \frac{\gamma^{1/\epsilon}}{(1-\gamma)^{1/\epsilon}}*(gc)^{1/\epsilon}.\]</div>
 <p>We also have the following second derivatives:</p>
 <div class="math notranslate nohighlight">
 \[
@@ -365,9 +388,10 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 \[\frac{d\ln{p}}{d\ln{g}} = (1-r) \left[ \frac{\delta\ln{\mathcal{U}_c}}{\delta \ln{g}} - \frac{G}{y^* - G} \frac{\delta\ln{\mathcal{U}_c}}{\delta \ln{c}}  \right] \]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">p0</span> <span class="o">=</span> <span class="n">dUdcbar</span><span class="o">**</span><span class="n">r</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">taubar</span><span class="p">)</span> <span class="c1"># initial price level</span>
-<span class="n">p</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">G</span><span class="p">:</span><span class="n">p0</span><span class="o">*</span><span class="n">dUdc</span><span class="p">(</span><span class="n">G</span><span class="o">/</span><span class="p">(</span><span class="n">Ybar</span><span class="o">-</span><span class="n">G</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">r</span><span class="p">)</span>
-<span class="n">dlnpdlng</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">G</span><span class="p">:(</span><span class="mi">1</span><span class="o">-</span><span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">dlnUcdlng</span><span class="p">(</span><span class="n">G</span><span class="o">/</span><span class="p">(</span><span class="n">Ybar</span><span class="o">-</span><span class="n">G</span><span class="p">))</span><span class="o">-</span><span class="n">dlnUcdlnc</span><span class="p">(</span><span class="n">G</span><span class="o">/</span><span class="p">(</span><span class="n">Ybar</span><span class="o">-</span><span class="n">G</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">G</span><span class="o">/</span><span class="p">(</span><span class="n">Ybar</span><span class="o">-</span><span class="n">G</span><span class="p">)))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># initial price level</span>
+<span class="n">p0</span> <span class="o">=</span> <span class="n">dUdcbar</span><span class="o">**</span><span class="n">r</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">taubar</span><span class="p">)</span> 
+<span class="n">p</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">G</span><span class="p">:</span><span class="n">p0</span><span class="o">*</span><span class="n">dUdc</span><span class="p">(</span><span class="n">G</span><span class="o">/</span><span class="p">(</span><span class="n">Ybar</span><span class="o">-</span><span class="n">G</span><span class="p">))</span><span class="o">**</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span>
+<span class="n">dlnpdlng</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">G</span><span class="p">:(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">r</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">dlnUcdlng</span><span class="p">(</span><span class="n">G</span><span class="o">/</span><span class="p">(</span><span class="n">Ybar</span> <span class="o">-</span> <span class="n">G</span><span class="p">))</span> <span class="o">-</span> <span class="n">dlnUcdlnc</span><span class="p">(</span><span class="n">G</span><span class="o">/</span><span class="p">(</span><span class="n">Ybar</span> <span class="o">-</span> <span class="n">G</span><span class="p">))</span><span class="o">*</span><span class="p">(</span><span class="n">G</span><span class="o">/</span><span class="p">(</span><span class="n">Ybar</span> <span class="o">-</span> <span class="n">G</span><span class="p">)))</span>
 </pre></div>
 </div>
 </div>
@@ -395,17 +419,25 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </pre></div>
 </div>
 </div>
+<div class="cell_output docutils container">
+<div class="output traceback highlight-ipythontb notranslate"><div class="highlight"><pre><span></span><span class="gt">  File</span><span class="nn"> &quot;&lt;ipython-input-65-9ec699970a07&gt;&quot;</span><span class="gt">, line </span><span class="mi">1</span>
+    <span class="n">dlnxdlng</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">G</span><span class="p">,</span> <span class="n">x</span><span class="p">:(</span><span class="n">G</span><span class="o">/</span><span class="n">Y</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">G</span><span class="o">/</span><span class="n">Y</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">*</span><span class="n">dlncdlng</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span><span class="o">/</span>
+                                                                  <span class="o">^</span>
+<span class="ne">SyntaxError</span>: invalid syntax
+</pre></div>
+</div>
+</div>
 </div>
 <p>Thus, we can compute the theoretical unemployment multiplier</p>
 <div class="math notranslate nohighlight">
-\[m = (1-\eta) (1-u) u \frac{y}{g}\frac{d\ln{x}}{d\ln{g}}\]</div>
+\[m = (1-\eta) (1-u) u \frac{y}{g}\frac{d\ln{x}}{d\ln{g}},\]</div>
 <p>and the empirical unemployment multiplier</p>
 <div class="math notranslate nohighlight">
-\[M = \frac{m}{1- u + \frac{g}{y}\frac{\eta}{1-\eta}\frac{\tau}{u}m}\]</div>
+\[M = \frac{m}{1- u + \frac{g}{y}\frac{\eta}{1-\eta}\frac{\tau}{u}m}.\]</div>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">G</span><span class="p">,</span> <span class="n">x</span><span class="p">:(</span><span class="mi">1</span><span class="o">-</span><span class="n">eta</span><span class="p">)</span><span class="o">*</span><span class="n">u</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">u</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">*</span><span class="n">dlnxdlng</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">Y</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">G</span> 
-<span class="n">M</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">G</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span><span class="n">m</span><span class="p">(</span><span class="n">G</span><span class="p">,</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">u</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">G</span><span class="o">/</span><span class="n">Y</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">eta</span><span class="o">*</span><span class="n">tau</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eta</span><span class="p">)</span><span class="o">/</span><span class="n">u</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">m</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">m</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">G</span><span class="p">,</span> <span class="n">x</span><span class="p">:(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eta</span><span class="p">)</span><span class="o">*</span><span class="n">u</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">u</span><span class="p">(</span><span class="n">x</span><span class="p">))</span><span class="o">*</span><span class="n">dlnxdlng</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">Y</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="n">G</span> 
+<span class="n">M</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">G</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span><span class="n">m</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">u</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">+</span> <span class="n">G</span><span class="o">/</span><span class="n">Y</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">eta</span><span class="o">*</span><span class="n">tau</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">eta</span><span class="p">)</span><span class="o">/</span><span class="n">u</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">*</span><span class="n">m</span><span class="p">(</span><span class="n">G</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
 </pre></div>
 </div>
 </div>
@@ -424,7 +456,7 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </div>
 </div>
 </div>
-<p>We will now run business cycle simulations under aggregate demand shocks, fixing the public expenditure policy at <span class="math notranslate nohighlight">\(G/Y = 16.5\%\)</span>. For each magnitude of aggregate demand, we find the equilibrium labor market tightness using a grid search.</p>
+<p>We will now run business cycle simulations under aggregate demand shocks, fixing the public expenditure policy at <span class="math notranslate nohighlight">\(G/Y = 16.5\%\)</span>. For each magnitude of aggregate demand, we find the equilibrium labor market tightness using grid search.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Range of aggregate demand</span>
@@ -435,6 +467,7 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 <span class="n">G0</span> <span class="o">=</span> <span class="n">GYbar</span><span class="o">*</span><span class="n">Y</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>	<span class="c1"># G such that G/Y=16.5%</span>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">alpha</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ALPHA</span><span class="p">):</span>
     <span class="n">eva</span> <span class="o">=</span> <span class="n">findeq</span><span class="p">(</span><span class="n">G0</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">alpha</span><span class="p">)</span>
+    <span class="c1"># Finding where AS = AD</span>
     <span class="n">ind</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argmin</span><span class="p">(</span><span class="n">eva</span><span class="p">)</span>
     <span class="c1"># Record equlibrium tightness and public expenditure</span>
     <span class="n">xad</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">x0</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
@@ -443,7 +476,7 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </div>
 </div>
 </div>
-<p>We then compute all other equilibrium variables with <span class="math notranslate nohighlight">\(G/Y = 16.5\%\)</span> under these aggregate demand shocks.</p>
+<p>We then compute all other equilibrium variables with <span class="math notranslate nohighlight">\(G/Y = 16.5\%\)</span> under the aggregate demand shocks.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Yad</span> <span class="o">=</span> <span class="n">Y</span><span class="p">(</span><span class="n">xad</span><span class="p">)</span> <span class="c1"># output</span>
@@ -454,7 +487,7 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </div>
 </div>
 </div>
-<p>We then run the business-cycle simulations under public spending shocks. We compute equilibrium variables for a range of public spending to output ratio <span class="math notranslate nohighlight">\(G/Y\)</span>.</p>
+<p>We then run business-cycle simulations under public spending shocks. We compute equilibrium variables for a range of public spending to output ratios <span class="math notranslate nohighlight">\(G/Y\)</span>.</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Range of public expenditure G/Y</span>
@@ -472,19 +505,19 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </div>
 </div>
 </div>
-<p>And we compute all other macro variables</p>
+<p>And we compute all other macro variables of interest:</p>
 <div class="cell docutils container">
 <div class="cell_input docutils container">
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Ygy</span> <span class="o">=</span> <span class="n">Y</span><span class="p">(</span><span class="n">xgy</span><span class="p">)</span> <span class="c1"># output</span>
-<span class="n">GYgy</span> <span class="o">=</span> <span class="n">Ggy</span><span class="o">/</span><span class="n">Ygy</span> <span class="c1"># G/Y</span>
-<span class="n">ugy</span> <span class="o">=</span> <span class="n">u</span><span class="p">(</span><span class="n">xgy</span><span class="p">)</span> <span class="c1"># unemployment rate</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Ygy</span> <span class="o">=</span> <span class="n">Y</span><span class="p">(</span><span class="n">xgy</span><span class="p">)</span>      <span class="c1"># output</span>
+<span class="n">GYgy</span> <span class="o">=</span> <span class="n">Ggy</span><span class="o">/</span><span class="n">Ygy</span>    <span class="c1"># G/Y</span>
+<span class="n">ugy</span> <span class="o">=</span> <span class="n">u</span><span class="p">(</span><span class="n">xgy</span><span class="p">)</span>      <span class="c1"># unemployment rate</span>
 <span class="n">Mgy</span> <span class="o">=</span> <span class="n">M</span><span class="p">(</span><span class="n">Ggy</span><span class="p">,</span> <span class="n">xgy</span><span class="p">)</span> <span class="c1"># output multiplier</span>
 </pre></div>
 </div>
 </div>
 </div>
 <p>Let’s first look at equilibria under aggregate demand shocks:</p>
-<div class="cell docutils container">
+<div class="cell tag_hide-input docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Unemployment</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
@@ -496,9 +529,9 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/chp8_33_0.svg" src="../_images/chp8_33_0.svg" /></div>
+<img alt="../_images/chp8_35_0.svg" src="../_images/chp8_35_0.svg" /></div>
 </div>
-<div class="cell docutils container">
+<div class="cell tag_hide-input docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Output multiplier</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
@@ -510,9 +543,9 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/chp8_34_0.svg" src="../_images/chp8_34_0.svg" /></div>
+<img alt="../_images/chp8_36_0.svg" src="../_images/chp8_36_0.svg" /></div>
 </div>
-<div class="cell docutils container">
+<div class="cell tag_hide-input docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Output </span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
@@ -524,10 +557,10 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/chp8_35_0.svg" src="../_images/chp8_35_0.svg" /></div>
+<img alt="../_images/chp8_37_0.svg" src="../_images/chp8_37_0.svg" /></div>
 </div>
 <p>We will then examine equilibria under different government spending:</p>
-<div class="cell docutils container">
+<div class="cell tag_hide-input docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Unemployment Rate</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
@@ -539,9 +572,9 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/chp8_37_0.svg" src="../_images/chp8_37_0.svg" /></div>
+<img alt="../_images/chp8_39_0.svg" src="../_images/chp8_39_0.svg" /></div>
 </div>
-<div class="cell docutils container">
+<div class="cell tag_hide-input docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Output Multiplier</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
@@ -553,9 +586,9 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/chp8_38_0.svg" src="../_images/chp8_38_0.svg" /></div>
+<img alt="../_images/chp8_40_0.svg" src="../_images/chp8_40_0.svg" /></div>
 </div>
-<div class="cell docutils container">
+<div class="cell tag_hide-input docutils container">
 <div class="cell_input docutils container">
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Unemployment Rate</span>
 <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">()</span>
@@ -567,7 +600,7 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
 </div>
 </div>
 <div class="cell_output docutils container">
-<img alt="../_images/chp8_39_0.svg" src="../_images/chp8_39_0.svg" /></div>
+<img alt="../_images/chp8_41_0.svg" src="../_images/chp8_41_0.svg" /></div>
 </div>
 </div>
 </div>
@@ -584,13 +617,13 @@ $<span class="math notranslate nohighlight">\(MRS_{gc} = \frac{\mathcal{U}_g}{\m
             mode: "python"
         },
         kernelOptions: {
-            kernelName: "python383jvsc74a57bd0aee8b7b246df8f9039afb4144a1f6fd8d2ca17a180786b69acc140d282b71a49",
+            kernelName: "python3",
             path: "./docs"
         },
         predefinedOutput: true
     }
     </script>
-    <script>kernelName = 'python383jvsc74a57bd0aee8b7b246df8f9039afb4144a1f6fd8d2ca17a180786b69acc140d282b71a49'</script>
+    <script>kernelName = 'python3'</script>
 
               </div>
               
