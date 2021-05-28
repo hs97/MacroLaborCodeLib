@@ -7,23 +7,22 @@
 # The model only features self-employed workers who sell their services on a goods market.
 # It would be possible to have firms and separate labor and goods markets using the model in [Michaillat & Saez (QJE, 2015)](https://doi.org/10.1093/qje/qjv006).
 # 
-# The code calibrates the model to US data and simulates the model in response to aggregate demand shocks and to government spending shocks
+# The code calibrates the model to US data and simulates the model in response to aggregate demand shocks and government spending shocks
 # 
-# Note that the simulations do not describe the response of the model to stochastic shocks (as in state-of-the-art macro). Rather the simulations are "quantitative comparative statics": they show the responses to "MIT shocks."
+# Note that the simulations do not describe the response of the model to stochastic shocks (as in state-of-the-art macro). Rather, the simulations are "quantitative comparative statics": they show responses to "MIT shocks."
 # 
-# For all derivations:  see section 2.2, section 2.4, section 5, and online appendix A of [Michaillat & Saez (Review of Economic Studies, 2019)](https://doi.org/10.1093/restud/rdy030) 
+# For all derivations, see section 2.2, section 2.4, section 5, and online appendix A in [Michaillat & Saez (Review of Economic Studies, 2019)](https://doi.org/10.1093/restud/rdy030) 
 
 # In[3]:
 
 
 get_ipython().run_line_magic('matplotlib', 'inline')
-
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 # ### Parameter Values
-# We use the following calibration for the following parameters, which is based on US data:
+# We first calibrate the following parameters that will be used in the model:
 # - $k$ : productive capacity, which can also be endogenized by adding a labor market where firms hire workers
 # - $\epsilon$ : elasticity of substitution between public and private consumption
 # - $\eta$ : matching elasticity
@@ -35,6 +34,8 @@ import matplotlib.pyplot as plt
 # - $\bar{M}$ : target for average output multiplier (same as unemployment multiplier)
 # - $\bar{G/C}$ : target for average G/C
 # - $\gamma$ : preference parameter
+# 
+# The calibration values below are based on US data.
 
 # In[ ]:
 
@@ -76,15 +77,42 @@ Cbar = CYbar*Ybar
 r = (Mbar*epsilon*CYbar)/(1 - Mbar*GYbar)
 
 
-# We also compute the following matching parameters. The formula for elasticity of output to tightness is given by 
+# We also compute the following matching parameters. 
 # 
-# $$\frac{d\ln{y}}{d\ln{x}} = (1-\eta) * u(x) - \eta * \tau(x)$$
+# The buying rate $q$, as a function of labor market tightness $x$, is:
+# 
+# $$q(x) = \omega x^{\eta}.$$
+# 
+# The selling rate $f$, as a function of labor market tightness $x$, is:
+# 
+# $$f(x) = \omega x^{1-\eta}.$$
 
 # In[ ]:
 
 
 q = lambda x:omega*x**(-eta) #buying rate
 f = lambda x:omega*x**(1 - eta) #selling rate
+
+
+# The average matching wedge $\bar{\tau}$ is:
+# 
+# $$\bar{\tau} = (1-\eta)\frac{\bar{u}}{\eta}.$$
+# 
+# The matching cost $\rho$ is given by:
+# 
+# $$\rho = q(\bar{x})\frac{\bar{\tau}}{1+\bar{\tau}}.$$
+# 
+# The matching wedge $\tau$ is:
+# 
+# $$\tau(x) = s\frac{\rho}{q(x) - s\rho}.$$
+# 
+# The formula for elasticity of output to tightness is given by 
+# 
+# $$\frac{d\ln{y}}{d\ln{x}} = (1-\eta) * u(x) - \eta * \tau(x).$$
+
+# In[ ]:
+
+
 taubar = (1-eta)*ubar/eta #average matching wedge
 rho = q(xbar)/s*taubar/(1 + taubar) #matching cost
 tau = lambda x:s*rho/(q(x) - s*rho) #matching wedge
@@ -123,6 +151,7 @@ else:
 # 
 # 
 # which gives the marginal rate of substitution:
+# 
 # $$MRS_{gc} = \frac{\mathcal{U}_g}{\mathcal{U}_c}  = \frac{\gamma^{1/\epsilon}}{(1-\gamma)^{1/\epsilon}}*(gc)^{1/\epsilon}.$$
 # 
 # We also have the following second derivatives:
@@ -161,9 +190,10 @@ dlnUcdlng = lambda gc:dlnUdlng(gc)/epsilon
 # In[ ]:
 
 
-p0 = dUdcbar**r/(1 + taubar) # initial price level
-p = lambda G:p0*dUdc(G/(Ybar-G))**(1-r)
-dlnpdlng = lambda G:(1-r)*(dlnUcdlng(G/(Ybar-G))-dlnUcdlnc(G/(Ybar-G))*(G/(Ybar-G)))
+# initial price level
+p0 = dUdcbar**r/(1 + taubar) 
+p = lambda G:p0*dUdc(G/(Ybar-G))**(1 - r)
+dlnpdlng = lambda G:(1 - r)*(dlnUcdlng(G/(Ybar - G)) - dlnUcdlnc(G/(Ybar - G))*(G/(Ybar - G)))
 
 
 # Then we want to compute the effects of public consumption and tightness on private demand, which are:
@@ -183,7 +213,7 @@ dlncdlng = lambda G, x:(dlnpdlng(G)-dlnUcdlng(G/(Y(x)-G)))/dlnUcdlnc(G/(Y(x)-G))
 # 
 # $$\frac{\delta\ln{x}}{\delta \ln{g}} = \frac{(g/y) + (c/y)\delta\ln{c}/\delta\ln{g}}{\delta\ln{y}/\delta\ln{x} - (c/y)\delta\ln{c}/\delta\ln{x}}$$
 
-# In[ ]:
+# In[65]:
 
 
 dlnxdlng = lambda G, x:(G/Y(x) + (1 - G/Y(x))*dlncdlng(G, x))/(dlnydlnx(x) - (1-G/Y(x))*dlncdlnx(G, x))
@@ -191,17 +221,17 @@ dlnxdlng = lambda G, x:(G/Y(x) + (1 - G/Y(x))*dlncdlng(G, x))/(dlnydlnx(x) - (1-
 
 # Thus, we can compute the theoretical unemployment multiplier
 # 
-# $$m = (1-\eta) (1-u) u \frac{y}{g}\frac{d\ln{x}}{d\ln{g}}$$
+# $$m = (1-\eta) (1-u) u \frac{y}{g}\frac{d\ln{x}}{d\ln{g}},$$
 # 
 # and the empirical unemployment multiplier
 # 
-# $$M = \frac{m}{1- u + \frac{g}{y}\frac{\eta}{1-\eta}\frac{\tau}{u}m}$$
+# $$M = \frac{m}{1- u + \frac{g}{y}\frac{\eta}{1-\eta}\frac{\tau}{u}m}.$$
 
 # In[ ]:
 
 
-m = lambda G, x:(1-eta)*u(x)*(1-u(x))*dlnxdlng(G,x)*Y(x)/G 
-M = lambda G, x:m(G,x)/(1 - u(x) + G/Y(x)*eta*tau(x)/(1 - eta)/u(x)*m(G, x))
+m = lambda G, x:(1 - eta)*u(x)*(1 - u(x))*dlnxdlng(G, x)*Y(x)/G 
+M = lambda G, x:m(G, x)/(1 - u(x) + G/Y(x)*eta*tau(x)/(1 - eta)/u(x)*m(G, x))
 
 
 # ### Simulations
@@ -217,7 +247,7 @@ M = lambda G, x:m(G,x)/(1 - u(x) + G/Y(x)*eta*tau(x)/(1 - eta)/u(x)*m(G, x))
 findeq = lambda G, x, alpha:abs(dUdc(G/(Y(x) - G)) - ((1 + tau(x))*p(G)/alpha))
 
 
-# We will now run business cycle simulations under aggregate demand shocks, fixing the public expenditure policy at $G/Y = 16.5\%$. For each magnitude of aggregate demand, we find the equilibrium labor market tightness using a grid search. 
+# We will now run business cycle simulations under aggregate demand shocks, fixing the public expenditure policy at $G/Y = 16.5\%$. For each magnitude of aggregate demand, we find the equilibrium labor market tightness using grid search. 
 
 # In[31]:
 
@@ -230,13 +260,14 @@ xad, Gad = np.empty(len(ALPHA)), np.empty(len(ALPHA))
 G0 = GYbar*Y(x0)	# G such that G/Y=16.5%
 for i, alpha in enumerate(ALPHA):
     eva = findeq(G0, x0, alpha)
+    # Finding where AS = AD
     ind = np.argmin(eva)
     # Record equlibrium tightness and public expenditure
     xad[i] = x0[ind]
     Gad[i] = G0[ind]
 
 
-# We then compute all other equilibrium variables with $G/Y = 16.5\%$ under these aggregate demand shocks. 
+# We then compute all other equilibrium variables with $G/Y = 16.5\%$ under the aggregate demand shocks. 
 
 # In[54]:
 
@@ -247,7 +278,7 @@ uad = u(xad) # unemployment rate
 Mad = M(Gad, xad) # output multiplier
 
 
-# We then run the business-cycle simulations under public spending shocks. We compute equilibrium variables for a range of public spending to output ratio $G/Y$.
+# We then run business-cycle simulations under public spending shocks. We compute equilibrium variables for a range of public spending to output ratios $G/Y$.
 
 # In[43]:
 
@@ -265,20 +296,20 @@ for i, gy in enumerate(GY0):
     Ggy[i]=G0[ind]
 
 
-# And we compute all other macro variables
+# And we compute all other macro variables of interest:
 
 # In[44]:
 
 
-Ygy = Y(xgy) # output
-GYgy = Ggy/Ygy # G/Y
-ugy = u(xgy) # unemployment rate
+Ygy = Y(xgy)      # output
+GYgy = Ggy/Ygy    # G/Y
+ugy = u(xgy)      # unemployment rate
 Mgy = M(Ggy, xgy) # output multiplier
 
 
 # Let's first look at equilibria under aggregate demand shocks:
 
-# In[45]:
+# In[67]:
 
 
 # Unemployment
@@ -344,10 +375,4 @@ ax.plot(GY0, Ygy)
 ax.set(xlabel=r'Public Expenditure $G/Y$', ylabel='Output = measured productivity')
 ax.grid()
 plt.show()
-
-
-# In[ ]:
-
-
-
 
